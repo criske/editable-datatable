@@ -1,6 +1,6 @@
 ## Editable cells for jQuery Datatables.
 
-Editable cells for jQuery Datatables, without using a specialized Datatables plugin like Editor.
+Small gist for editable cells for jQuery Datatables, without using a specialized Datatables plugin like Editor.
 
 The table is connected to a mocked  data server. Each editable cell state is tracked allowing to edit, update and cancel updates to server across pages. 
 
