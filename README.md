@@ -1,6 +1,8 @@
-#Editable cells for jQuery Datatables, without using a specialized Datatables plugin like Editor.
+## Editable cells for jQuery Datatables.
 
-The table is connected to a mocked server. Each cell state is tracked so that the remote updates can be canceled. 
+Editable cells for jQuery Datatables, without using a specialized Datatables plugin like Editor.
 
-Running example: https://github.com/criske/editable-datatable/issues/1
+The table is connected to a mocked  data server. Each editable cell state is tracked allowing to edit, update and cancel upadates to server across pages. 
+
+![Tables](https://user-images.githubusercontent.com/10284893/103467484-074ed600-4d58-11eb-91c2-906fbbcc7063.gif)
 
