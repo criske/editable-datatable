@@ -15,7 +15,6 @@ $(document).ready(function () {
                                     value: c.hourlyRate,
                                     editingValue: c.hourlyRate,
                                     isEditing: false,
-                                    hasFocus: false,
                                 },
                                 value: c.value,
                                 options: {
@@ -39,7 +38,8 @@ $(document).ready(function () {
                     if (type === "display") {
                         if (data.isEditing) {
                             var disabled = (row.options.updatingHandler !== null) ? "disabled" : "";
-                            return "<input type='number' class='hourlyRateInput w-100' " + disabled + " value=" + data.editingValue + ">";
+                            return '<div class="input-group pr-1"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '">' +
+                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + '><i class="fa fa-times"></i></button></span></div>';
                         } else {
                             return "<div class='hourlyRateStatic d-flex align-items-center w-100' style='height:30px'>" + data.value + "$</div>";
                         }
@@ -58,13 +58,13 @@ $(document).ready(function () {
                     if (type === "display") {
                         var title;
                         if (row.hourlyRate.isEditing && data.updatingHandler == null) {
-                            title = "Upload";
+                            title = '<i class="fas fa-sync"></i>';
                         } else if (data.updatingHandler !== null) {
-                            title = "Cancel";
+                            title = '<i class="fas fa-sync fa-spin"></i>';
                         } else {
-                            title = "Edit";
+                            title = '<i class="fas fa-edit"></i>';
                         }
-                        return "<button class='edit'>" + title + "</button>";
+                        return "<button class='edit btn btn-sm '>" + title + "</button>";
                     } else {
                         return data;
                     }
@@ -77,14 +77,12 @@ $(document).ready(function () {
         console.log('Redraw occurred at: ' + new Date().getTime());
     });
 
-    $("#contracts").on("change", ".hourlyRateInput", function (e) {
+    $("#contracts").on("click", ".hourlyRateInputClear", function (e) {
         var table = $("#contracts").DataTable();
         var row = table.row($(e.currentTarget).parents('tr'));
-        var editingValue = $(this).val();
         var data = row.data();
-        table.cell({ row: row.index(), column: 2 }).data(
-            $.extend(true, data.hourlyRate, { editingValue: editingValue })
-        );
+        row.data($.extend(true, data, { hourlyRate: { editingValue: data.hourlyRate.value, isEditing: false } }))
+            .draw("page");
     });
 
     $("#contracts").on("click", ".hourlyRateStatic", function (e) {
@@ -100,7 +98,7 @@ $(document).ready(function () {
             input[0].setSelectionRange(input.val().length, input.val().length);
             input[0].type = 'number';
         }, 50);
-        
+
     });
 
     $("#contracts").on("click", ".edit", function (e) {
@@ -110,6 +108,10 @@ $(document).ready(function () {
         if (!data.hourlyRate.isEditing) {
             row.data($.extend(true, data, { hourlyRate: { isEditing: true } })).draw("page");
         } else if (data.options.updatingHandler === null) {
+            var editingValue = $("#" + row.id() + " .hourlyRateInput").val();
+            table.cell({ row: row.index(), column: 2 }).data(
+                $.extend(true, data.hourlyRate, { editingValue: editingValue })
+            );
             var updatingHandler = $.ajax({
                 url: "/api/john/test/contracts",
                 type: "POST",
