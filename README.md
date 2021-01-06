@@ -8,3 +8,4 @@ The table is connected to a mocked  data server. Each editable cell state is tra
 
 Updates:
 - made editable cells to be clearable/revertable to the value before edit.([PR-2](https://github.com/criske/editable-datatable/pull/2))
+- showing tooltip under input if input is invalid. ([PR-5](https://github.com/criske/editable-datatable/pull/5))
