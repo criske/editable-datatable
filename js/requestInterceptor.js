@@ -5,7 +5,7 @@ var db = function ($) {
     var roles = ["ARCH", "DEV", "PO", "QA", "REV"];
 
     function genHourlyRate() {
-        return Math.floor(Math.random() * Math.floor(15)) + 10;
+        return Math.floor(Math.random() * Math.floor(15)) + 15;
     }
 
     function genContractValue() {
