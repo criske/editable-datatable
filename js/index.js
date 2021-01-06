@@ -15,6 +15,7 @@ $(document).ready(function () {
                                     value: c.hourlyRate,
                                     editingValue: c.hourlyRate,
                                     isEditing: false,
+                                    error: null
                                 },
                                 value: c.value,
                                 options: {
@@ -38,8 +39,11 @@ $(document).ready(function () {
                     if (type === "display") {
                         if (data.isEditing) {
                             var disabled = (row.options.updatingHandler !== null) ? "disabled" : "";
-                            return '<div class="input-group pr-1"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '">' +
-                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + '><i class="fa fa-times"></i></button></span></div>';
+                            var error = (data.error !== null) ? '<div class="invalid-tooltip d-block">' + data.error + '</div>' : '';
+                            var errorStyle = (data.error != null) ? 'style = "border-color: rgba(220,53,69,.9)"' : '';
+                            return '<div class="input-group pr-1" style="position:relative;"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '" ' + errorStyle + '>' +
+                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + '><i class="fa fa-times"></i></button></span>' +
+                                error + '</div>';
                         } else {
                             return "<div class='hourlyRateStatic d-flex align-items-center w-100' style='height:30px'>" + data.value + "$</div>";
                         }
@@ -85,6 +89,27 @@ $(document).ready(function () {
             .draw("page");
     });
 
+    $("#contracts").on("click", ".hourlyRateInput", function (e) {
+        var table = $("#contracts").DataTable();
+        var row = table.row($(e.currentTarget).parents('tr'));
+        var data = row.data();
+        if (data.hourlyRate.error != null) {
+            var index = row.index();
+            table.cell({ row: row.index(), column: 2 }).data(
+                $.extend(true, data.hourlyRate, { error: null })
+            );
+            //focus and put cursor position at the end
+            setTimeout(function () {
+                var input = table.cell({ row: index, column: 2 }).nodes().to$().find(".hourlyRateInput");
+                input.focus();
+                input[0].type = 'text';
+                input[0].setSelectionRange(input.val().length, input.val().length);
+                input[0].type = 'number';
+            }, 50);
+        }
+    });
+
+
     $("#contracts").on("click", ".hourlyRateStatic", function (e) {
         var table = $("#contracts").DataTable();
         var row = table.row($(e.currentTarget).parents('tr'));
@@ -92,7 +117,7 @@ $(document).ready(function () {
         row.data($.extend(true, data, { hourlyRate: { isEditing: true } })).draw("page");
         var input = table.cell({ row: row.index(), column: 2 }).nodes().to$().find(".hourlyRateInput");
         //focus and put cursor position at the end
-        setTimeout(function(){
+        setTimeout(function () {
             input.focus();
             input[0].type = 'text';
             input[0].setSelectionRange(input.val().length, input.val().length);
@@ -109,27 +134,33 @@ $(document).ready(function () {
             row.data($.extend(true, data, { hourlyRate: { isEditing: true } })).draw("page");
         } else if (data.options.updatingHandler === null) {
             var editingValue = $("#" + row.id() + " .hourlyRateInput").val();
-            table.cell({ row: row.index(), column: 2 }).data(
-                $.extend(true, data.hourlyRate, { editingValue: editingValue })
-            );
-            var updatingHandler = $.ajax({
-                url: "/api/john/test/contracts",
-                type: "POST",
-                data: "contributor=" + data.contributor + "&role=" + data.role + "&hourlyRate=" + data.hourlyRate.editingValue,
-                success: function (updated) {
-                    var row = $("#contracts").DataTable().row("#" + updated.id.username + updated.id.role);
-                    var data = row.data();
-                    row.data($.extend(true, data, {
-                        hourlyRate: { isEditing: false, value: updated.hourlyRate },
-                        options: { updatingHandler: null }
-                    })).draw("page");
-                },
-                error: function () {
+            if (parseInt(editingValue) < 15) {
+                table.cell({ row: row.index(), column: 2 }).data(
+                    $.extend(true, data.hourlyRate, { editingValue: editingValue, error: "Hourly rate must be at least 15$" })
+                );
+            } else {
+                table.cell({ row: row.index(), column: 2 }).data(
+                    $.extend(true, data.hourlyRate, { editingValue: editingValue })
+                );
+                var updatingHandler = $.ajax({
+                    url: "/api/john/test/contracts",
+                    type: "POST",
+                    data: "contributor=" + data.contributor + "&role=" + data.role + "&hourlyRate=" + data.hourlyRate.editingValue,
+                    success: function (updated) {
+                        var row = $("#contracts").DataTable().row("#" + updated.id.username + updated.id.role);
+                        var data = row.data();
+                        row.data($.extend(true, data, {
+                            hourlyRate: { isEditing: false, value: updated.hourlyRate },
+                            options: { updatingHandler: null }
+                        })).draw("page");
+                    },
+                    error: function () {
 
-                }
-            });
-            table.cell({ row: row.index(), column: 4 }).data({ updatingHandler: updatingHandler });
-            table.cell({ row: row.index(), column: 2 }).invalidate().draw("page");
+                    }
+                });
+                table.cell({ row: row.index(), column: 4 }).data({ updatingHandler: updatingHandler });
+                table.cell({ row: row.index(), column: 2 }).invalidate().draw("page");
+            }
         } else {
             data.options.updatingHandler.abort();
             table.cell({ row: row.index(), column: 4 }).data({ updatingHandler: null });
