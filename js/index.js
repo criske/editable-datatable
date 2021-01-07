@@ -41,9 +41,8 @@ $(document).ready(function () {
                             var disabled = (row.options.updatingHandler !== null) ? "disabled" : "";
                             var error = (data.error !== null) ? '<div class="invalid-tooltip d-block">' + data.error + '</div>' : '';
                             var errorInputStyle = (data.error != null) ? 'style = "border-color: rgba(220,53,69,.9)"' : '';
-                            return '<div class="input-group pr-1 hourlyRateInputGroup"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '" ' + errorInputStyle + '>' +
-                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + ' ' + 
-                                errorClearStyle + '><i class="fa fa-times" ' + errorIconStyle +'></i></button></span>' +
+                            return '<div class="input-group pr-1 hourlyRateInputGroup is-valid" style="position:relative;"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '" ' + errorInputStyle + '>' +
+                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + ' ><i class="fa fa-times"></i></button></span>' +
                                 error + '</div>';
                         } else {
                             return "<div class='hourlyRateStatic d-flex align-items-center w-100' style='height:30px'>" + data.value + "$</div>";
@@ -86,7 +85,7 @@ $(document).ready(function () {
         var table = $("#contracts").DataTable();
         var row = table.row($(e.currentTarget).parents('tr'));
         var data = row.data();
-        row.data($.extend(true, data, { hourlyRate: { editingValue: data.hourlyRate.value, isEditing: false } }))
+        row.data($.extend(true, data, { hourlyRate: { editingValue: data.hourlyRate.value, isEditing: false, error: null } }))
             .draw("page");
     });
 
@@ -139,6 +138,11 @@ $(document).ready(function () {
                 table.cell({ row: row.index(), column: 2 }).data(
                     $.extend(true, data.hourlyRate, { editingValue: editingValue, error: "Hourly rate must be at least 15$" })
                 );
+            } else if (parseInt(editingValue) === data.hourlyRate.value) {
+                //no need to update the remote db
+                row.data($.extend(true, data, {
+                    hourlyRate: { isEditing: false, editingValue: editingValue },
+                })).draw("page");
             } else {
                 table.cell({ row: row.index(), column: 2 }).data(
                     $.extend(true, data.hourlyRate, { editingValue: editingValue })
