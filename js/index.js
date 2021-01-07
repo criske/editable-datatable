@@ -40,9 +40,10 @@ $(document).ready(function () {
                         if (data.isEditing) {
                             var disabled = (row.options.updatingHandler !== null) ? "disabled" : "";
                             var error = (data.error !== null) ? '<div class="invalid-tooltip d-block">' + data.error + '</div>' : '';
-                            var errorStyle = (data.error != null) ? 'style = "border-color: rgba(220,53,69,.9)"' : '';
-                            return '<div class="input-group pr-1" style="position:relative;"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '" ' + errorStyle + '>' +
-                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + '><i class="fa fa-times"></i></button></span>' +
+                            var errorInputStyle = (data.error != null) ? 'style = "border-color: rgba(220,53,69,.9)"' : '';
+                            return '<div class="input-group pr-1 hourlyRateInputGroup"><input type="number" class="hourlyRateInput form-control shadow-none" ' + disabled + ' value="' + data.editingValue + '" ' + errorInputStyle + '>' +
+                                '<span class="input-group-append"><button class="hourlyRateInputClear btn btn-outline border-left-0 border" type="button" ' + disabled + ' ' + 
+                                errorClearStyle + '><i class="fa fa-times" ' + errorIconStyle +'></i></button></span>' +
                                 error + '</div>';
                         } else {
                             return "<div class='hourlyRateStatic d-flex align-items-center w-100' style='height:30px'>" + data.value + "$</div>";
